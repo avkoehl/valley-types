@@ -1,6 +1,6 @@
 # PROJECT SPECIFIC:
 /raw_data/
-/data/
+/outputs/
 
 # VIM
 *~
