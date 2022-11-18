@@ -12,14 +12,14 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from shapely.geometry import box
 
+# useful tool for creating a bounding box: https://boundingbox.klokantech.com/
+
 # workflow:
-#  download metadata for dataset
-#  create csv
-#  define a bounding box
-#  intersect that bounding box with the metadata dataset
+#  download metadata for dataset (name, xmlfilepath, datafilepath, minx, miny, maxx, maxy)
+#  filter dataset based on intersection with user provided bounding box 
 #  download the relevant tiff files
-#  mosiac
-#  crop to bounding box
+#  merge and crop to the bounding box
+#  save the combined file
 
 # alternate workflow: 
 #    Use the interface at https://apps.nationalmap.gov/downloader/
@@ -69,50 +69,34 @@ def create_metadata_df():
     df = df.set_index("ID")
     return  df
 
-def filter_data(metadf, bbox):
-    """ 
-    Filter metadata rows to exclude any rows that are not intersecting with 
-    the supplied bounding box
-    """
-    return metadf.loc[metadf.intersects(bbox)]
 
 def download_tiffs(tiff_url_series, odir):
     """ 
     Download each tiff file from the list of tiff urls and save in the 
     output directory
     """
+    ofiles = []
     for url in tiff_url_series:
         data = requests.get(url).content
         with open(odir + '/' + url.split('/')[-1], 'wb') as handle:
+            ofiles.append(handle.name)
             handle.write(data)
-    return
-
-def mosaic_and_crop(odir, ofilepath):
-    """
-    Load in the downloaded geo_tiffs, mosiac and crop them
-    This will probably struggle with > 50 images at once!
-    """
-
-    # list all tif files
-    mosaic = merge(tif_files)
-
-    # then crop the mosaic
-
-    return raster
+    return ofiles
 
 def main():
-    minx = -121.23
-    miny = 38.23
-    maxx = -120.286
-    maxy = 39.29
+    minx = -122.3
+    miny = 38.47
+    maxx = -122.1
+    maxy = 38.7
 
-    odir = "./"
-
+    ofile = f"./USGS_13_{minx}_{miny}_{maxx}_{maxy}.tif"
 
     meta = create_metadata_df()
-    filtered = filter_data(meta, box(minx, miny, maxx, maxy))
-    download_tiffs(filtered['tiff_url'], ".")
-    full = mosiac_and_crop(odir, ofile)
+    filtered = meta.loc[meta.intersects(box(minx,miny,maxx,maxy))]
+    tif_files = download_tiffs(filtered['tiff_url'], ".")
+    combined = merge(tif_files, bounds=(minx, miny, maxx, maxy), dst_path=ofile)
 
-    # save to file
+    # show(combined)  # to make sure it worked
 
+if __name__ == "__main__":
+    main()
