@@ -4,6 +4,9 @@ import xml.etree.ElementTree as et
 from bs4 import BeautifulSoup as bs
 import pandas as pd
 import geopandas as gpd 
+import rasterio
+from rasterio.plot import show
+from rasterio.merge import merge
 import requests
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
@@ -84,7 +87,18 @@ def download_tiffs(tiff_url_series, odir):
             handle.write(data)
     return
 
-def mosaic_and_crop(odir):
+def mosaic_and_crop(odir, ofilepath):
+    """
+    Load in the downloaded geo_tiffs, mosiac and crop them
+    """
+
+    # list all tif files
+    mosaic = merge(tif_files)
+
+    # then crop the mosaic
+
+    # then save to file
+
     return
 
 def main():
@@ -99,5 +113,5 @@ def main():
     meta = create_metadata_df()
     filtered = filter_data(meta, box(minx, miny, maxx, maxy))
     download_tiffs(filtered['tiff_url'], ".")
-    full = mosiac_and_crop(odir)
+    full = mosiac_and_crop(odir, ofile)
 
