@@ -90,6 +90,7 @@ def download_tiffs(tiff_url_series, odir):
 def mosaic_and_crop(odir, ofilepath):
     """
     Load in the downloaded geo_tiffs, mosiac and crop them
+    This will probably struggle with > 50 images at once!
     """
 
     # list all tif files
@@ -97,9 +98,7 @@ def mosaic_and_crop(odir, ofilepath):
 
     # then crop the mosaic
 
-    # then save to file
-
-    return
+    return raster
 
 def main():
     minx = -121.23
@@ -114,4 +113,6 @@ def main():
     filtered = filter_data(meta, box(minx, miny, maxx, maxy))
     download_tiffs(filtered['tiff_url'], ".")
     full = mosiac_and_crop(odir, ofile)
+
+    # save to file
 
