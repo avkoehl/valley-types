@@ -1,3 +1,5 @@
+import os
+import sys
 import re
 import xml.etree.ElementTree as et
 
@@ -5,8 +7,9 @@ from bs4 import BeautifulSoup as bs
 import pandas as pd
 import geopandas as gpd 
 import rasterio
-from rasterio.plot import show
+from rasterio.mask import mask
 from rasterio.merge import merge
+from rasterio.plot import show
 import requests
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
@@ -84,17 +87,30 @@ def download_tiffs(tiff_url_series, odir):
     return ofiles
 
 def main():
-    minx = -122.3
-    miny = 38.47
-    maxx = -122.1
-    maxy = 38.7
+    minx = -122.57
+    miny = 37.81
+    maxx = -122.45
+    maxy = 37.87
 
-    ofile = f"./USGS_13_{minx}_{miny}_{maxx}_{maxy}.tif"
+    ofile = f"../raw_data/USGS13:{minx}_{miny}_{maxx}_{maxy}.tif"
 
     meta = create_metadata_df()
     filtered = meta.loc[meta.intersects(box(minx,miny,maxx,maxy))]
     tif_files = download_tiffs(filtered['tiff_url'], ".")
+
+    if not tif_files:
+        sys.exit(f"No DEM Files found for {minx} {miny} {maxx} {maxy}")
+
     combined = merge(tif_files, bounds=(minx, miny, maxx, maxy), dst_path=ofile)
+
+
+    # clean up
+    for f in tif_files:
+        if os.path.exists(f):
+            os.remove(f)
+
+    if os.path.exists("geckodriver.log"):
+        os.remove("geckodriver.log")
 
     # show(combined)  # to make sure it worked
 
