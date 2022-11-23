@@ -1,3 +1,6 @@
+# brew install gdal
+# brew install geckodriver
+
 import os
 import sys
 import re
