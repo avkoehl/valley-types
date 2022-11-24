@@ -2,6 +2,9 @@
 /raw_data/
 /outputs/
 
+# RASTERIO
+*.aux.xml 
+
 # VIM
 *~
 *.sw*
